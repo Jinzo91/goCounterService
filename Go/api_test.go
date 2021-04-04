@@ -23,6 +23,7 @@ func checkResponseCounter(t *testing.T, expected, actual int) {
     }
 }
 
+//Make sure that the API is up and running before testing.
 //Checks whether the API is reachable.
 func TestApiHome(t *testing.T) {
     resp, err := http.Get("http://localhost:8000/")

@@ -6,6 +6,12 @@ import (
 	"log"
 	"net/http"
 	"encoding/json"
+	"os"
+	"os/signal"
+	"syscall"
+	"context"
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
@@ -101,7 +107,7 @@ func resetValue(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(counter)
 }
 
-func handleRequests() {
+func handleRequests(ctx context.Context) {
 	//Use Gorilla/mux router for better handling of requests.
 	router := mux.NewRouter()
 	//Routes and their used/accepted methods.
@@ -117,9 +123,39 @@ func handleRequests() {
     })
 	handler := c.Handler(router)
 	//Listen & serve on defined port.
-	log.Fatal(http.ListenAndServe(":8000", handler))
+	srv := &http.Server{
+		Addr:    ":8000",
+		Handler: handler,
+	}
+	go func() {
+		srv.ListenAndServe()
+	}()
+	log.Printf("server started")
+	//Listen to context and do a clean termination when server shuts down.
+	<-ctx.Done()
+	log.Printf("server stopped")
+	ctxShutDown, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer func() {
+		cancel()
+	}()
+	err := srv.Shutdown(ctxShutDown)
+	if err != nil {
+		log.Fatalf("server Shutdown Failed:%+s", err)
+	}
+	log.Printf("server exited properly")
 }
 
+
 func main() {
-	handleRequests()
+	sigs := make(chan os.Signal, 1)
+    signal.Notify(sigs, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	//Simple clean-up code. Creates a listener on a goroutine which notifies
+	//the programm if it receives a signal from the OS. For more details, see handleRequests(ctx).
+	ctx, cancel := context.WithCancel(context.Background())
+    go func() {
+        sig := <-sigs
+        fmt.Printf("Got an %s signal. Terminating...\n", sig)
+        cancel()
+    }()
+	handleRequests(ctx)
 }
