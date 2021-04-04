@@ -2,10 +2,6 @@
 This repository contains a REST API written with Go and a React web-app for demonstration purposes. The API is a simple counter-service which can increment by +1, decrement by -1 and return the current counter-value.
 
 
-**Table of Contents**
-
-
-[TOC]
 
 
 #Installation & Setup
@@ -22,6 +18,7 @@ This project supports two deployment scenarios:
 ###1) Local Deployment
 **Deploy REST API**
 - Go inside the project and open the **Go** folder.
+- Install all dependencies: `go get ./...`
 - Then open a terminal inside and start the API server: `go run restAPI.go`
 - The server will terminate once you close the terminal or when you press **CTRL+C**.
 
@@ -47,6 +44,7 @@ This project supports two deployment scenarios:
 ###1) Unit Tests
 - For the unit tests, the API-server must be running.
 - Go inside the project and open the **Go** folder.
+- Install all dependencies: `go get ./...`
 - Then open a terminal inside and start the API server: `go run restAPI.go`
 - Afterwards open another terminal and run the unit tests with: `go test`
 - Following tests will be executed: TestApiHome, TestIncrement, TestMaxLimit, TestDecrement, TestMinLimit, TestResetCounter, TestReturnValue.
